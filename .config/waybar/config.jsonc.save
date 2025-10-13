@@ -1,0 +1,149 @@
+// ~/.config/waybar/config
+{
+    "layer": "top",
+    "position": "top",
+    "height": 40,
+    "spacing": 8,
+
+    // Modules that are aligned to the left
+    "modules-left": [
+        "custom/launcher",
+        "hyprland/workspaces",
+        "hyprland/windowcount",
+        "hyprland/window",
+    ],
+
+    // Modules that are aligned to the center
+    "modules-center": [
+        "clock",
+    ],
+
+    // Modules that are aligned to the right
+    "modules-right": [
+        "tray",
+        "pulseaudio",
+        "cpu",
+        "memory",
+        "battery",
+        "group/group-power"
+    ],
+
+    // Module definitions
+    "tray": {
+        "icon-size": 18, 
+        "spacing": 10,
+        "reverse-direction": false, 
+        "show-passive-items": false 
+    },
+
+    "hyprland/windowcount": {
+        "format": "{}",
+        "format-empty": " ",
+        "separate-outputs": true 
+    },
+
+    "hyprland/workspaces": {
+        "format": "{name}",
+        "on-click": "activate",
+        "persistent-workspaces": {
+            "*": 5 // 5 workspaces by default on every monitor
+        }
+    },
+
+    "custom/launcher": {
+        "format": "󰣇",
+        "tooltip": false,
+        "on-click": "rofi -show drun" // Or your preferred launcher
+    },
+
+    "clock": {
+        "format": "󰥔 {:%H:%M %p}",
+        "format-alt": " {:%A, %b %d}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "timezone": "Asia/Dhaka" // Set to your timezone
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon} {volume}%",
+        "format-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "phone-muted": "",
+            "portable": "",
+            "car": "",
+            "default": ["", ""]
+        },
+        "scroll-step": 1,
+        "on-click": "pavucontrol",
+        "ignored-sinks": ["Easy Effects Sink"]
+    },
+    
+    "cpu": {
+        "format": " {usage}%",
+        "tooltip": true,
+        "interval": 1
+    },
+
+    "memory": {
+        "format": "󰍛 {used:0.1f}G/{total:0.1f}G",
+        "interval": 1
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": "󰂄 {capacity}%",
+        "format-alt": "{time} {icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    "hyprland/window": {
+        "format": "{}",
+        "icon": true,
+        "icon-size": 16, // A reasonable size for a clean look
+        "separate-outputs": true, // Recommended: Show the window for the specific bar's monitor
+    },
+
+    "group/group-power": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "not-power",
+            "transition-left-to-right": false,
+        },
+        "modules": [
+            "custom/power", // First element is the "group leader" and won't ever be hidden
+            "custom/quit",
+            "custom/lock",
+            "custom/reboot",
+        ]
+    },
+    "custom/quit": {
+        "format": "󰗽",
+        "tooltip-format": "Logout",
+        "on-click": "hyprctl dispatch exit"
+    },
+    "custom/lock": {
+        "format": "󰍁",
+        "tooltip-format": "Lock",
+        "on-click": "pidof hyprlock || hyprlock"
+    },
+    "custom/reboot": {
+        "format": "󰜉",
+        "tooltip-format": "Restart",
+        "on-click": "reboot"
+    },
+    "custom/power": {
+        "format": "󰐥",
+        "tooltip-format": "Shutdown",
+        "on-click": "shutdown now"
+    },
+}

@@ -1,0 +1,28 @@
+/* ~/.config/rofi/config.rasi */
+
+@theme "tokyonight"
+
+configuration {
+    modi: "drun,emoji,clipboard:~/.config/rofi/clipboard.sh";
+    font: "JetBrainsMono Nerd Font 14";
+    show-icons: true;
+    icon-theme: "Papirus";
+    terminal: "alacritty";
+    location: 0;
+    yoffset: 8;
+    xoffset: 0;
+    fixed-num-lines: true;
+    display-drun: "󰣇 Apps";
+    display-emoji: "󰞅 Emoji";
+    display-clipboard: " Clipboard";
+    sidebar-mode: true;
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+    disable-history: false;
+    hide-scrollbar: false;
+    drun-display-format: "{icon}{name}";
+    window-format: "{w} - {c} - {t:40}";
+    window-match-fields: "title,class";
+    drun-match-fields: "name,generic,exec,categories,keywords";
+}

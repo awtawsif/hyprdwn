@@ -1,0 +1,230 @@
+## Modern, Intuitive, Elegant, Beautiful, and Performant nano Configuration
+## Combining your existing preferences with enhanced features, and default keybindings.
+
+## --- Basic Editor Behavior ---
+
+# Automatically indent new lines to the same level as the previous line.
+set autoindent
+
+# Constantly report the cursor position (line, column, char) on the status bar.
+set constantshow
+
+# Display line numbers to the left of the text area.
+set linenumbers
+
+# Make the Home key smarter: jump to the beginning of non-whitespace text, then to the true start of the line.
+set smarthome
+
+# Display overlong lines on multiple screen lines (soft wrap).
+set softwrap
+
+# Automatically hard-wrap the current line when it becomes overlong.
+set breaklonglines
+
+# When soft wrapping, wrap lines at blank characters (spaces/tabs) instead of rudely at the screen edge.
+# (This was commented out in your file, but highly recommended for softwrap.)
+set atblanks
+
+# Convert typed tabs to spaces, according to the tabsize.
+set tabstospaces
+
+# Set tab size to 4 columns for consistent indentation.
+set tabsize 4
+
+# Save files by default in Unix format (LF line endings).
+# (This was commented out in your file, but is a good modern default.)
+set unix
+
+# Remove trailing whitespace from lines when saving or justifying.
+# (This was commented out in your file, but is good for clean code.)
+set trimblanks
+
+# Enable mouse support for cursor placement, marking, and executing shortcuts.
+# (This was commented out in your file, but is a common modern feature.)
+# set mouse
+
+# Save the last hundred search/replace strings and executed commands for reuse.
+set historylog
+
+# Remember cursor and anchor positions between sessions for recently edited files.
+set positionlog
+
+# Display a scrollbar on the right-hand side of the edit window.
+set indicator
+
+# Make status-bar messages disappear quickly (after 1 keystroke).
+# (This was commented out in your file, but improves responsiveness.)
+set quickblank
+
+# Enable multi-buffer editing (inserting a file will put it into a separate buffer).
+set multibuffer
+
+# Put the cursor on the highlighted item in the file browser and show it in the help viewer.
+set showcursor
+
+# Use cut-from-cursor-to-end-of-line by default.
+# (This was commented out in your file, but is a common preference.)
+# set cutfromcursor
+
+# Enable vim-style lock files to indicate when a file is being edited.
+# (This was commented out in your file, but can be useful in collaborative environments.)
+# set locking
+
+# Allow backup files to succeed even if permissions can't be reset (use with caution).
+# set allow_insecure_backup
+
+## --- Interface Aesthetics and Colors ---
+
+# Use bold text instead of reverse video for interface elements.
+# (This was commented out in your file, but can enhance readability.)
+set boldtext
+
+# Your preferred color scheme:
+set titlecolor bold,black,blue
+set promptcolor bold,black,green
+set statuscolor bold,black,cyan
+set errorcolor bold,white,red
+set spotlightcolor black,yellow
+set selectedcolor black,cyan
+set stripecolor ,blue
+set scrollercolor cyan
+set numbercolor cyan
+set keycolor bold,white
+set functioncolor bold,green
+
+## --- Syntax Highlighting (Essential for Modern Editing) ---
+
+# Include common syntax definitions. Adjust path if necessary for your system.
+# Your file included these, so we'll keep them.
+include /usr/share/nano/*.nanorc
+include /usr/share/nano/extra/*.nanorc
+include /usr/share/nano-syntax-highlighting/*.nanorc
+
+## --- Key Bindings (Default nano behavior) ---
+
+# Rebind ^F to forward search (default since nano 8.0, but explicit for clarity)
+bind ^F forward main
+
+# Rebind ^B to backward search (default since nano 8.0, but explicit for clarity)
+bind ^B back main
+
+# Make M-F (Alt-F) perform formatting (if syntax defines a formatter)
+bind M-F formatter main
+
+# Make M-B (Alt-B) perform linting (if syntax defines a linter)
+bind M-B linter main
+
+# Suspend nano with Ctrl+Z (common Unix behavior)
+bind ^Z suspend main
+
+# Copy marked region to system clipboard (requires xsel or similar clipboard tool)
+# On macOS, you might use 'pbcopy' instead of 'xsel -ib'
+# bind Sh-M-C "{execute}| xsel -ib {enter}{undo}" main
+
+# Restore default cut/copy/paste (Ctrl+K for cut, Alt+6 for copy, Ctrl+U for paste)
+# These are the nano defaults, no explicit bind needed unless overriding.
+# If you want to explicitly set them back:
+# bind ^K cut main
+# bind M-6 copy main
+# bind ^U paste all
+
+# Restore default exit (Ctrl+X)
+# bind ^X exit all
+
+# Restore default save/open (Ctrl+O for writeout, Ctrl+R for insert)
+# bind ^O writeout main
+# bind ^R insert main
+
+# Restore default search/replace (Ctrl+W for whereis, Ctrl+\ for replace)
+# bind ^W whereis all
+# bind ^\ replace all
+
+# Restore default mark (Ctrl+^)
+# bind ^@ mark main # Ctrl+@ is often Ctrl+Space or Ctrl+Shift+2
+
+# Restore default execute (M-!)
+# bind M-! execute main
+
+# Restore default undo/redo (Alt+U for undo, Alt+E for redo)
+# bind M-U undo main
+# bind M-E redo main
+
+# Restore default refresh (Ctrl+L)
+bind ^L refresh main
+
+# Restore default comment (M-K)
+bind M-K comment main
+
+# Restore default word deletion (M-Del for chopwordright, M-Backspace for chopwordleft)
+# bind M-Del chopwordright main
+# bind M-Backspace chopwordleft main
+
+# Restore default go to line (Ctrl+_)
+# bind ^_ gotoline main
+
+# Restore default find next/previous (Alt+W for findnext, Alt+Q for findprevious)
+# bind M-W findnext all
+# bind M-Q findprevious all
+
+# Restore default go to beginning/end of line (Ctrl+A / Ctrl+E)
+# bind ^A home main
+# bind ^E end main
+
+# Restore default location (Ctrl+C)
+# bind ^C location main
+
+# Restore default browser navigation (M-Y for gotodir)
+# bind M-Y gotodir browser
+
+# Restore default cut rest of file (M-T)
+# bind M-T cutrestoffile execute
+
+# Restore default linter (M-B, already handled above)
+
+# Restore default unbinds (if any were explicitly set)
+# These are typically not needed unless you had specific unbinds.
+# unbind ^U all
+# unbind ^N main
+# unbind ^Y all
+# unbind M-J main
+# unbind M-T main
+
+
+## --- Advanced Settings (Uncomment if needed) ---
+
+# Do case-sensitive searches by default.
+# (This was commented out in your file, uncomment if desired.)
+# set casesensitive
+
+# Use regular expressions for searches by default.
+# (This was commented out in your file, uncomment if desired.)
+# set regexp
+
+# Set the target width for justifying and automatic hard-wrapping.
+# If 0 or less, wrapping occurs at screen width minus the number.
+# (This was commented out in your file, uncomment if desired.)
+# set fill -8
+
+# Draw a vertical stripe at a specific column (e.g., 80 for code style guides).
+# (This was commented out in your file, uncomment if desired.)
+# set guidestripe 80
+# set stripecolor ,#333 # A subtle dark grey stripe
+
+# Use a custom spell checker (e.g., aspell)
+# (This was commented out in your file, uncomment if desired.)
+# set speller "aspell -x -c"
+
+# Set custom characters for displaying tabs and spaces (default is "»⋅" for UTF-8)
+# (This was commented out in your file, uncomment if desired.)
+# set whitespace "»·"
+
+# Treat punctuation characters as parts of words (useful for programming)
+# (This was commented out in your file, uncomment if desired.)
+# set wordbounds
+
+# Specify additional characters to be considered part of words (overrides wordbounds if set)
+# (This was commented out in your file, uncomment if desired.)
+# set wordchars "_-" # Example: include underscore and hyphen in words
+
+# Let  an  unmodified Backspace or Delete erase the marked region (instead of a single character, and without affecting the cutbuffer).
+set zap

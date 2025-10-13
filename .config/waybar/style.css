@@ -1,0 +1,221 @@
+/* ~/.config/waybar/style.css */
+
+/* -----------------------------------------------------
+ * General
+ * ----------------------------------------------------- */
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: 'JetBrainsMono Nerd Font', FontAwesome, sans-serif;
+    font-size: 16px;
+    min-height: 0;
+}
+
+window#waybar {
+    /* Use RGBA for transparency */
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* -----------------------------------------------------
+ * Module styling
+ * ----------------------------------------------------- */
+
+.modules-left > widget > *,
+.modules-center > widget > *,
+.modules-right > widget > * {
+    padding: 0 15px;
+    margin: 5px 6px;
+    /* Slightly more opaque background for modules */
+    background-color: rgb(41, 46, 66);
+    border-radius: 12px;
+}
+
+/* -----------------------------------------------------
+ * Modules
+ * ----------------------------------------------------- */
+
+#workspaces button {
+    padding: 0 5px;
+    color: #787c99; /* tokyonight-comment */
+    background-color: transparent;
+    border-radius: 10px;
+}
+
+#workspaces button.active {
+    color: #bb9af7; /* tokyonight-magenta */
+    background-color: rgba(41, 46, 66, 0);
+    border-radius: 12px;
+    padding: 0 15px;
+}
+
+#workspaces button:hover {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 12px;
+}
+
+#custom-launcher {
+    color: #7aa2f7; /* tokyonight-blue */
+    font-size: 20px;
+}
+
+/* --- Tokyo Night Themed Window Module --- */
+
+#window {
+    /* Base Style */
+    color: #aeffff;
+    font-size: 15px;
+    transition: all 0.3s ease; /* Smooth transition for state changes */
+}
+
+/* * 1. Empty Workspace State
+ * The window module should be minimal or transparent when nothing is open.
+ */
+window#waybar.empty #window {
+    opacity: 0; /* Slight dimming */
+}
+
+/* * 3. Floating Window State
+ * Use the warning color (Red) to indicate that the workspace is in an unusual/floating state.
+ */
+window#waybar.floating #window {
+    color: #f7768e; /* Red Text */
+    font-style: italic;
+}
+
+#clock {
+    color: #e0af68; /* tokyonight-yellow */
+}
+
+#pulseaudio {
+    color: #7dcfff; /* tokyonight-cyan */
+}
+
+#pulseaudio.muted {
+    color: #565f89; /* tokyonight-comment */
+}
+
+#network {
+    color: #9ece6a; /* tokyonight-green */
+}
+
+#cpu {
+    color: #bb9af7; /* tokyonight-magenta */
+}
+
+#memory {
+    color: #f7768e; /* tokyonight-red */
+}
+
+#battery {
+    color: #9ece6a; /* tokyonight-green */
+}
+
+#battery.charging, #battery.plugged {
+    color: #9ece6a; /* tokyonight-green */
+}
+
+#battery.warning:not(.charging) {
+    color: #e0af68; /* tokyonight-yellow */
+}
+
+#battery.critical:not(.charging) {
+    color: #f7768e; /* tokyonight-red */
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to {
+        color: #1a1b26; /* tokyonight-bg */
+    }
+}
+
+tooltip {
+  background-color: #1e2029;
+  border: 1px solid #bb9af7; /* tokyonight-magenta */
+  border-radius: 10px;
+}
+
+tooltip label {
+  color: #c0caf5; /* tokyonight-fg */
+}
+
+/* --- Tokyo Night Themed Windowcount --- */
+
+#windowcount {
+    color: #c0caf5; /* tokyonight-fg */
+    font-size: 10px;
+    transition: all 0.3s ease; /* Smooth transitions for state changes */
+}
+
+window#waybar.empty #windowcount {
+    opacity: 0;
+}
+
+
+/* --- Tokyo Night Themed Tray Module --- */
+
+#tray {
+    /* Base Container Style */
+    padding: 0 10px; /* Padding inside the container */
+    margin-right: 10px; /* Separates the module from the edge/other modules */
+    margin-left: 5px;
+}
+
+/* Define the pulsing animation */
+@keyframes pulse {
+    from {
+        background-color: transparent;
+    }
+    to {
+        background-color: rgba(255, 198, 98, 0.2); /* Semi-transparent orange glow */
+    }
+}
+
+/* * 4. Context Menu Styling (Right-Click Menu) 
+ */
+#tray menu {
+    background-color: #1a1b26; /* Dark Blue Background */
+    border: 1px solid #7aa2f7; /* Blue accent border */
+    border-radius: 8px;
+    padding: 5px;
+}
+
+/* --- Styling for Individual Action Modules (Thematic Colors) --- */
+
+/* Style for the group leader (the main power icon) */
+#group-power #custom-power {
+    /* Use Green for the main 'Power' icon to indicate a toggle/main control */
+    color: #9ece6a; 
+    font-size: 18px;
+    margin: 0 2px;
+    margin-right: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Lock Screen (Safest action - use the Blue accent) */
+#group-power #custom-lock {
+    margin: 0 12px;
+    font-size: 18px;
+    color: #7aa2f7; /* Blue Accent */
+}
+
+/* Reboot (Warning/Irreversible action - use the Red accent) */
+#group-power #custom-reboot {
+    padding: 0 12px;
+    margin-right: 6px;
+    font-size: 18px;
+    color: #f7768e; /* Red Accent */
+}
+
+/* Quit/Exit Hyprland (Warning/Irreversible action - use the Red accent) */
+#group-power #custom-quit {
+    margin: 0 12px;
+    margin-left: 8px;
+    font-size: 18px;
+    color: #f7768e; /* Red Accent */
+}
