@@ -1,0 +1,54 @@
+# Hyprland & Wayland
+hyprland hypridle hyprlock hyprpicker hyprpolkitagent hyprshot ly mako
+polkit-kde-agent rofi rofi-emoji swww waybar wl-clipboard
+xdg-desktop-portal-hyprland xdg-utils cliphist blueman
+
+# Theming & Fonts
+capitaine-cursors
+otf-font-awesome
+ttf-jetbrains-mono-nerd
+noto-fonts-emoji
+nwg-look
+
+# CLI Tools & Utilities
+github-cli
+btop
+exa
+bat
+alacritty
+brightnessctl
+nano
+nano-syntax-highlighting
+mousepad
+bash-completion
+fastfetch
+wget
+man-db
+jq
+xclip
+
+# Development
+npm
+
+# File Manager
+thunar
+thunar-volman
+thunar-archive-plugin
+gvfs
+gvfs-mtp
+
+# Archive & Compression
+unrar
+zip
+unzip
+xarchiver
+p7zip
+
+# Media & Images
+tumbler
+
+# Web Browser
+firefox
+
+# AUR Packages (yay)
+tokyonight-gtk-theme-git
