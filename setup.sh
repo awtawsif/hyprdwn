@@ -33,27 +33,6 @@ setup_yay() {
     fi
 }
 
-# --- Function to install packages ---
-install_packages() {
-    echo -e "${CYAN}Installing packages from package_list.txt...${NC}"
-
-    # Read packages from file, filter comments and empty lines
-    mapfile -t packages < <(grep -vE '^\s*#|^\s*$' package_list.txt)
-
-    if [ ${#packages[@]} -eq 0 ]; then
-        echo -e "${YELLOW}No packages to install.${NC}"
-        return
-    fi
-
-    # Install all packages in one go
-    if yay -S --noconfirm "${packages[@]}"; then
-        echo -e "${GREEN}All packages installed successfully.${NC}"
-    else
-        echo -e "${RED}Failed to install some packages.${NC}"
-        return 1
-    fi
-}
-
 # --- Function to copy config files ---
 copy_configs() {
     echo -e "${CYAN}Copying config files...${NC}"
@@ -115,9 +94,10 @@ main() {
     echo -e "${CYAN}Starting setup...${NC}"
 
     setup_yay || { echo -e "${RED}Failed to setup yay. Aborting.${NC}"; exit 1; }
-    install_packages || { echo -e "${RED}Package installation failed. Aborting.${NC}"; exit 1; }
+    ./install_packages.sh || { echo -e "${RED}Package installation failed. Aborting.${NC}"; exit 1; }
     copy_configs || { echo -e "${RED}Config copy failed. Aborting.${NC}"; exit 1; }
     setup_user_dirs
+    sudo systemctl enable ly.service
 
     echo -e "${GREEN}Setup completed successfully!${NC}"
 }
