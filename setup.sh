@@ -37,8 +37,15 @@ setup_yay() {
 copy_configs() {
     echo -e "${CYAN}Copying config files...${NC}"
 
+    # Backup existing .config directory
+    if [ -d "$HOME/.config" ]; then
+        echo -e "${YELLOW}Backing up existing .config directory...${NC}"
+        mv "$HOME/.config" "$HOME/.config.bak.$(date +%Y%m%d-%H%M%S)"
+        echo -e "${GREEN}Backup created.${NC}"
+    fi
+
     # Copy .config directory
-    if cp -rf .config "$HOME/"; then
+    if cp -r .config "$HOME/"; then
         echo -e "${GREEN}.config directory copied successfully.${NC}"
     else
         echo -e "${RED}Failed to copy .config directory.${NC}"

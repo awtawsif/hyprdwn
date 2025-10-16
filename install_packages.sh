@@ -10,31 +10,61 @@ echo -e "${CYAN}Installing packages...${NC}"
 
 # Official repository packages
 PACMAN_PACKAGES=(
-    hyprland hypridle hyprlock hyprpicker hyprpolkitagent hyprshot ly mako
-    polkit-kde-agent rofi rofi-emoji swww waybar wl-clipboard
-    xdg-desktop-portal-hyprland xdg-utils cliphist blueman
+    # --- Hyprland Ecosystem ---
+    hyprland
+    hypridle
+    hyprlock
+    hyprpicker
+    hyprpolkitagent
+    hyprshot
+    xdg-desktop-portal-hyprland
+
+    # --- System Utilities & Services ---
+    ly # Display manager
+    mako # Notification daemon
+    polkit-kde-agent # Polkit agent
+    rofi # Application launcher
+    rofi-emoji
+    swww # Wallpaper daemon
+    waybar # Status bar
+    wl-clipboard # Wayland clipboard utilities
+    xdg-utils
+    cliphist # Clipboard history
+    blueman # Bluetooth manager
+    btop # Resource monitor
+    slurp # Screen region selection
+    smartmontools # S.M.A.R.T. disk monitoring
+    uwsm
+    wireless_tools
+    grim # Screenshot utility
+    wpa_supplicant # Wi-Fi support
+    brightnessctl # Brightness control
+    bash-completion
+    fastfetch # System information tool
+    wget
+    man-db
+    jq # JSON processor
+    xclip # X11 clipboard utility
+    npm # Node package manager
+
+    # --- Appearance & Theming ---
     capitaine-cursors
     otf-font-awesome
     ttf-jetbrains-mono-nerd
     noto-fonts-emoji
-    nwg-look
+    nwg-look # GTK theme switcher
+
+    # --- CLI Tools ---
     github-cli
-    btop
-    exa
-    bat
-    alacritty
-    brightnessctl
+    exa # ls replacement
+    bat # cat replacement
     nano
     nano-syntax-highlighting
-    mousepad
-    bash-completion
-    fastfetch
-    wget
-    man-db
-    jq
-    xclip
-    npm
-    thunar
+
+    # --- GUI Applications & File Management ---
+    alacritty # Terminal emulator
+    mousepad # Text editor
+    thunar # File manager
     thunar-volman
     thunar-archive-plugin
     gvfs
@@ -44,14 +74,33 @@ PACMAN_PACKAGES=(
     unzip
     xarchiver
     p7zip
-    tumbler
-    firefox
+    tumbler # Thumbnail generator
+    firefox # Web browser
+    vlc # Media player
+    vlc-plugins-base
+    vlc-plugins-extra
+    ffmpeg # Multimedia framework
 )
 
 # AUR packages
 YAY_PACKAGES=(
+    # --- Theming ---
     tokyonight-gtk-theme-git
+
+    # --- Development ---
+    visual-studio-code-bin
 )
+
+# Confirmation prompt
+echo -e "${CYAN}The following packages will be installed:${NC}"
+echo -e "${GREEN}Official packages:${NC} ${PACMAN_PACKAGES[*]}"
+echo -e "${GREEN}AUR packages:${NC} ${YAY_PACKAGES[*]}"
+read -p "Do you want to proceed with the installation? [y/N] " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${RED}Installation aborted.${NC}"
+    exit 1
+fi
 
 # Install official packages with pacman
 if [ ${#PACMAN_PACKAGES[@]} -gt 0 ]; then

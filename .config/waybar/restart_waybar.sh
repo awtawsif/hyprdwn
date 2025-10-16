@@ -1,3 +1,3 @@
-killall -9 waybar
+killall waybar
 
 waybar &

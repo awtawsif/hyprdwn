@@ -71,7 +71,6 @@ export XDG_DATA_HOME="$HOME/.local/share"
 
 # Essential environment settings
 export EDITOR="nano"
-export TERM="alacritty"
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
@@ -174,25 +173,6 @@ shopt -s nocaseglob      # Case-insensitive globbing
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
-
-# ===== Path Configuration =====
-# Clean PATH to avoid duplicates
-if [ -n "$PATH" ]; then
-    old_PATH=$PATH:
-    PATH=
-    while [ -n "$old_PATH" ]; do
-        x=${old_PATH%%:*}
-        case $PATH: in
-            *:"$x":*) ;;
-            *) PATH=$PATH:$x;;
-        esac
-        old_PATH=${old_PATH#*:}
-    done
-    PATH=${PATH#:}
-    unset old_PATH x
-fi
-
-export PATH="$HOME/.local/bin:$PATH"
 
 # ===== Security =====
 umask 077  # Set secure default permissions
