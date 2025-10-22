@@ -37,7 +37,7 @@ Setting up your Hyprland environment is simple. The `setup.sh` script handles ev
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/hyprdwn.git
+    git clone https://github.com/awtawsif/hyprdwn.git
     cd hyprdwn
     ```
 
@@ -67,20 +67,28 @@ After the script finishes, reboot your system, and you should be greeted by the 
 
 Keybindings are managed in `~/.config/hypr/modules/keybindings.conf`. Here are some of the defaults:
 
-| Key Combination        | Action                               |
-| ---------------------- | ------------------------------------ |
-| `Super + Q`            | Close active window                  |
-| `Super + M`            | Exit Hyprland session                |
-| `Super + E`            | Open Thunar (File Manager)           |
-| `Super + V`            | Open Visual Studio Code              |
-| `Super + T`            | Open Alacritty (Terminal)            |
-| `Super + R`            | Open Rofi (Application Launcher)     |
-| `Super + Space`        | Toggle floating window               |
-| `Super + P`            | Toggle pseudo-tiling                 |
-| `Super + F`            | Toggle fullscreen                    |
-| `Super + [1-9]`        | Switch to workspace 1-9              |
-| `Super + Shift + [1-9]`| Move active window to workspace 1-9  |
-| `Super + Mouse Wheel`  | Scroll through workspaces            |
+| Key Combination           | Action                                      |
+| ------------------------- | ------------------------------------------- |
+| `Super + Return`          | Open Alacritty (Terminal)                   |
+| `Super + F`               | Open Thunar (File Manager)                  |
+| `Super + D`               | Open Rofi (Application Launcher)            |
+| `Super + B`               | Open Firefox (Browser)                      |
+| `Super + Shift + Q`       | Close active window                         |
+| `Super + Shift + E`       | Exit Hyprland session                       |
+| `Super + Shift + Space`   | Toggle floating window                      |
+| `Super + Shift + R`       | Reload Hyprland and Waybar                  |
+| `Super + Shift + F`       | Toggle fullscreen                           |
+| `Super + Shift + Return`  | Toggle Waybar                               |
+| `Alt + Print`             | Screenshot active display                   |
+| `Super + Print`           | Screenshot active window                    |
+| `Super + Shift + Print`   | Screenshot a region                         |
+| `Super + [h/j/k/l]`       | Move focus (Vim motions)                    |
+| `Super + Shift + [h/j/k/l]`| Move window (Vim motions)                   |
+| `Super + [1-9]`           | Switch to workspace 1-9                     |
+| `Super + Shift + [1-9]`   | Move active window to workspace 1-9         |
+| `Super + S`               | Toggle special workspace (scratchpad)       |
+| `Super + Shift + S`       | Move active window to special workspace     |
+| `Super + Mouse Wheel`     | Scroll through workspaces                   |
 
 ---
 
