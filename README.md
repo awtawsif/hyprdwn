@@ -1,6 +1,6 @@
 <div align="center">
 
-#  HyprDwn  हाइपरडाउन 
+#  HyprDwn  
 
 **A sleek, modern, and personalized Hyprland environment with a stunning Tokyo Night theme.**
 
