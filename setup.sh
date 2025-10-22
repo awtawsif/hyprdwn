@@ -104,9 +104,26 @@ main() {
     ./install_packages.sh || { echo -e "${RED}Package installation failed. Aborting.${NC}"; exit 1; }
     copy_configs || { echo -e "${RED}Config copy failed. Aborting.${NC}"; exit 1; }
     setup_user_dirs
+    setup_git
     sudo systemctl enable ly.service
 
     echo -e "${GREEN}Setup completed successfully!${NC}"
+}
+
+# --- Function to setup git ---
+setup_git() {
+    echo -e "${CYAN}Setting up git...${NC}"
+    read -p "Do you want to setup your git username and email? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        read -p "Enter your git username: " git_username
+        read -p "Enter your git email: " git_email
+        git config --global user.name "$git_username"
+        git config --global user.email "$git_email"
+        echo -e "${GREEN}Git username and email have been set.${NC}"
+    else
+        echo -e "${YELLOW}Skipping git setup.${NC}"
+    fi
 }
 
 # --- Run main ---

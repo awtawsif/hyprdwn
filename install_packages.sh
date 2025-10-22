@@ -36,8 +36,8 @@ PACMAN_PACKAGES=(
     smartmontools # S.M.A.R.T. disk monitoring
     uwsm
     wireless_tools
+    network-manager-applet # Applet for networkmanager
     grim # Screenshot utility
-    wpa_supplicant # Wi-Fi support
     brightnessctl # Brightness control
     bash-completion
     fastfetch # System information tool
