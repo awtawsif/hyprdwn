@@ -20,7 +20,7 @@ PACMAN_PACKAGES=(
     xdg-desktop-portal-hyprland
 
     # --- System Utilities & Services ---
-    ly # Display manager
+    sddm # Display manager
     mako # Notification daemon
     polkit-kde-agent # Polkit agent
     rofi # Application launcher
@@ -86,6 +86,7 @@ PACMAN_PACKAGES=(
 YAY_PACKAGES=(
     # --- Theming ---
     tokyonight-gtk-theme-git
+    sddm-silent-theme
 
     # --- Development ---
     visual-studio-code-bin

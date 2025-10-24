@@ -105,7 +105,7 @@ main() {
     copy_configs || { echo -e "${RED}Config copy failed. Aborting.${NC}"; exit 1; }
     setup_user_dirs
     setup_git
-    sudo systemctl enable ly.service
+    sudo systemctl enable sddm.service
 
     echo -e "${GREEN}Setup completed successfully!${NC}"
 }
