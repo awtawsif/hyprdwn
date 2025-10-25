@@ -60,6 +60,28 @@ copy_configs() {
         return 1
     fi
 
+    # Copy SDDM config
+    echo -e "${CYAN}Copying SDDM configuration...${NC}"
+    if sudo cp -f sddm.conf /etc/; then
+        echo -e "${GREEN}sddm.conf copied to /etc/ successfully.${NC}"
+    else
+        echo -e "${RED}Failed to copy sddm.conf to /etc/.${NC}"
+        return 1
+    fi
+
+    # Copy SDDM theme metadata
+    echo -e "${CYAN}Copying SDDM theme metadata...${NC}"
+    if [ ! -d "/usr/share/sddm/themes/silent/" ]; then
+        echo -e "${YELLOW}Creating directory /usr/share/sddm/themes/silent/...${NC}"
+        sudo mkdir -p "/usr/share/sddm/themes/silent/"
+    fi
+    if sudo cp -f metadata.desktop /usr/share/sddm/themes/silent/; then
+        echo -e "${GREEN}metadata.desktop copied to /usr/share/sddm/themes/silent/ successfully.${NC}"
+    else
+        echo -e "${RED}Failed to copy metadata.desktop to /usr/share/sddm/themes/silent/.${NC}"
+        return 1
+    fi
+
     echo -e "${CYAN}Sourcing .profile...${NC}"
     # shellcheck source=/dev/null
     source "$HOME/.profile"
