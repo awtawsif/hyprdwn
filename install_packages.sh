@@ -58,6 +58,7 @@ PACMAN_PACKAGES=(
     github-cli
     exa # ls replacement
     bat # cat replacement
+    zoxide # cd replacement
     nano
     nano-syntax-highlighting
 

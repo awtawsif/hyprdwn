@@ -186,3 +186,6 @@ stty -ixon  # Enable Ctrl+S for forward search
 
 # Reduce disk writes
 export LESSHISTFILE=/dev/null
+
+# Initialize zoxide
+eval "$(zoxide init --cmd cd bash)"
