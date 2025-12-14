@@ -81,22 +81,19 @@ PACMAN_PACKAGES=(
     vlc-plugins-base
     vlc-plugins-extra
     ffmpeg # Multimedia framework
-)
 
-# AUR packages
-YAY_PACKAGES=(
-    # --- Theming ---
+    # --- Chaotic-AUR Packages ---
     tokyonight-gtk-theme-git
     sddm-silent-theme
-
-    # --- Development ---
     visual-studio-code-bin
 )
 
+# AUR packages (remaining packages not in Chaotic-AUR)
+YAY_PACKAGES=()
+
 # Confirmation prompt
 echo -e "${CYAN}The following packages will be installed:${NC}"
-echo -e "${GREEN}Official packages:${NC} ${PACMAN_PACKAGES[*]}"
-echo -e "${GREEN}AUR packages:${NC} ${YAY_PACKAGES[*]}"
+echo -e "${GREEN}Packages (including Chaotic-AUR):${NC} ${PACMAN_PACKAGES[*]}"
 read -p "Do you want to proceed with the installation? [y/N] " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -104,26 +101,13 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# Install official packages with pacman
+# Install all packages with pacman (including Chaotic-AUR)
 if [ ${#PACMAN_PACKAGES[@]} -gt 0 ]; then
-    echo -e "${CYAN}Installing official packages with pacman...${NC}"
+    echo -e "${CYAN}Installing packages with pacman (including Chaotic-AUR)...${NC}"
     if sudo pacman -S --noconfirm "${PACMAN_PACKAGES[@]}"; then
-        echo -e "${GREEN}Official packages installed successfully.${NC}"
+        echo -e "${GREEN}All packages installed successfully.${NC}"
     else
-        echo -e "${RED}Failed to install some official packages.${NC}"
+        echo -e "${RED}Failed to install some packages.${NC}"
         exit 1
     fi
 fi
-
-# Install AUR packages with yay
-if [ ${#YAY_PACKAGES[@]} -gt 0 ]; then
-    echo -e "${CYAN}Installing AUR packages with yay...${NC}"
-    if yay -S --noconfirm "${YAY_PACKAGES[@]}"; then
-        echo -e "${GREEN}AUR packages installed successfully.${NC}"
-    else
-        echo -e "${RED}Failed to install some AUR packages.${NC}"
-        exit 1
-    fi
-fi
-
-echo -e "${GREEN}All packages installed successfully.${NC}"
