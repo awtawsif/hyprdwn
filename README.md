@@ -149,7 +149,6 @@ All configurations are located in the `.config` directory, organized by applicat
 -   **`alacritty/`**: Manages the `alacritty.toml` terminal configuration with Tokyo Night theme.
 -   **`mako/`**: Configuration for the notification daemon.
 -   **`nwg-look/`**: GTK theme and appearance settings.
--   **`gtk-3.0/` & `gtk-4.0/`**: GTK theme configurations for consistent theming.
 -   **`fastfetch/`**: System information tool configuration.
 
 ### Customization Tips
