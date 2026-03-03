@@ -75,8 +75,9 @@ This setup uses multiple package sources to provide a complete desktop experienc
 - **Official Repositories**: Core system packages and most applications via `pacman`
 - **Chaotic-AUR**: Pre-compiled AUR packages for faster installation, including:
   - `tokyonight-gtk-theme-git` - Tokyo Night GTK theme
-  - `sddm-silent-theme` - SDDM login theme
   - `visual-studio-code-bin` - Visual Studio Code editor
+- **AUR via yay**: Additional packages available in the AUR:
+  - `sddm-silent-theme` - SDDM login theme
 
 ---
 

@@ -84,16 +84,19 @@ PACMAN_PACKAGES=(
 
     # --- Chaotic-AUR Packages ---
     tokyonight-gtk-theme-git
-    sddm-silent-theme
     visual-studio-code-bin
+    sddm-silent-theme
 )
 
-# AUR packages (remaining packages not in Chaotic-AUR)
-YAY_PACKAGES=()
+# AUR packages (remaining packages not in Chaotic-AUR or available in yay)
+YAY_PACKAGES=(
+    sddm-silent-theme
+)
 
 # Confirmation prompt
 echo -e "${CYAN}The following packages will be installed:${NC}"
-echo -e "${GREEN}Packages (including Chaotic-AUR):${NC} ${PACMAN_PACKAGES[*]}"
+echo -e "${GREEN}Packages (Official Repositories):${NC} ${PACMAN_PACKAGES[*]}"
+echo -e "${GREEN}Packages (AUR via yay):${NC} ${YAY_PACKAGES[*]}"
 read -p "Do you want to proceed with the installation? [y/N] " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -101,13 +104,24 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# Install all packages with pacman (including Chaotic-AUR)
+# Install official repository packages with pacman
 if [ ${#PACMAN_PACKAGES[@]} -gt 0 ]; then
-    echo -e "${CYAN}Installing packages with pacman (including Chaotic-AUR)...${NC}"
+    echo -e "${CYAN}Installing packages with pacman (Official Repositories)...${NC}"
     if sudo pacman -S --noconfirm "${PACMAN_PACKAGES[@]}"; then
-        echo -e "${GREEN}All packages installed successfully.${NC}"
+        echo -e "${GREEN}All official packages installed successfully.${NC}"
     else
-        echo -e "${RED}Failed to install some packages.${NC}"
+        echo -e "${RED}Failed to install some official packages.${NC}"
+        exit 1
+    fi
+fi
+
+# Install AUR packages with yay
+if [ ${#YAY_PACKAGES[@]} -gt 0 ]; then
+    echo -e "${CYAN}Installing packages with yay (AUR)...${NC}"
+    if yay -S --noconfirm "${YAY_PACKAGES[@]}"; then
+        echo -e "${GREEN}All AUR packages installed successfully.${NC}"
+    else
+        echo -e "${RED}Failed to install some AUR packages.${NC}"
         exit 1
     fi
 fi
