@@ -16,6 +16,11 @@ RATING="s"
 ORDER="random"
 MAX_FILE_SIZE="2MB"
 MIN_FILE_SIZE=""
+MIN_WIDTH=""
+MAX_WIDTH=""
+MIN_HEIGHT=""
+MAX_HEIGHT=""
+ASPECT_RATIO=""
 MIN_SCORE=""
 ARTIST=""
 POOL_ID=""
@@ -29,6 +34,12 @@ DISCOVER_ARTISTS=false
 LIST_POOLS=false
 SEARCH_POOLS=""
 EXPORT_TAGS=false
+
+# --- Logging Variables ---
+ENABLE_LOGGING=false
+LOG_FILE="$HOME/.config/konapaper/konapaper.log"
+LOG_LEVEL="detailed"
+LOG_ROTATION=true
 
 
 # --- Config ---
@@ -50,6 +61,13 @@ load_config() {
     if [[ -f "$EXPORTED_TAGS_FILE" ]]; then
         mapfile -t RANDOM_TAGS_LIST < "$EXPORTED_TAGS_FILE"
     fi
+    WALLPAPER_COMMAND=${WALLPAPER_COMMAND:-""}
+    
+    # Load logging configuration
+    ENABLE_LOGGING=${ENABLE_LOGGING:-false}
+    LOG_FILE=${LOG_FILE:-"$HOME/.config/konapaper/konapaper.log"}
+    LOG_LEVEL=${LOG_LEVEL:-"detailed"}
+    LOG_ROTATION=${LOG_ROTATION:-true}
 }
 
 process_random_tags() {
@@ -65,8 +83,175 @@ process_random_tags() {
     fi
 }
 
+# --- Logging Functions ---
+log_init() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    local log_dir
+    log_dir=$(dirname "$LOG_FILE")
+    mkdir -p "$log_dir"
+    
+    # Log rotation
+    if $LOG_ROTATION && [[ -f "$LOG_FILE" ]]; then
+        local log_size
+        log_size=$(stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
+        local max_size=10485760  # 10MB
+        
+        if (( log_size > max_size )); then
+            for (( i=4; i>=1; i-- )); do
+                if [[ -f "${LOG_FILE}.${i}" ]]; then
+                    mv "${LOG_FILE}.${i}" "${LOG_FILE}.$((i+1))"
+                fi
+            done
+            if [[ -f "$LOG_FILE" ]]; then
+                mv "$LOG_FILE" "${LOG_FILE}.1"
+            fi
+        fi
+    fi
+    
+    # Create or append to log file with session header
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    {
+        echo ""
+        echo "=== KONAPAPER EXECUTION SESSION ==="
+        echo "Timestamp: $timestamp"
+        echo "Script: $0"
+        echo "Working Directory: $(pwd)"
+        echo "User: $(whoami)"
+        echo "PID: $$"
+        echo "=================================="
+    } >> "$LOG_FILE"
+}
+
+log_write() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    local level="$1"
+    local message="$2"
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    # Check if this log level should be written based on LOG_LEVEL
+    case "$LOG_LEVEL" in
+        "basic")
+            if [[ "$level" == "DEBUG" ]]; then
+                return 0
+            fi
+            ;;
+        "detailed")
+            if [[ "$level" == "TRACE" ]]; then
+                return 0
+            fi
+            ;;
+        "verbose")
+            # All levels are logged in verbose mode
+            ;;
+    esac
+    
+    echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
+}
+
+log_command_args() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    log_write "INFO" "Command line arguments:"
+    log_write "INFO" "  Tags: '$TAGS'"
+    log_write "INFO" "  Limit: $LIMIT"
+    log_write "INFO" "  Page: $PAGE"
+    log_write "INFO" "  Rating: $RATING"
+    log_write "INFO" "  Order: $ORDER"
+    log_write "INFO" "  Max file size: $MAX_FILE_SIZE"
+    [[ -n "$MIN_FILE_SIZE" ]] && log_write "INFO" "  Min file size: $MIN_FILE_SIZE"
+    [[ -n "$MIN_WIDTH" ]] && log_write "INFO" "  Min width: $MIN_WIDTH"
+    [[ -n "$MAX_WIDTH" ]] && log_write "INFO" "  Max width: $MAX_WIDTH"
+    [[ -n "$MIN_HEIGHT" ]] && log_write "INFO" "  Min height: $MIN_HEIGHT"
+    [[ -n "$MAX_HEIGHT" ]] && log_write "INFO" "  Max height: $MAX_HEIGHT"
+    [[ -n "$ASPECT_RATIO" ]] && log_write "INFO" "  Aspect ratio: $ASPECT_RATIO"
+    [[ -n "$MIN_SCORE" ]] && log_write "INFO" "  Min score: $MIN_SCORE"
+    [[ -n "$ARTIST" ]] && log_write "INFO" "  Artist: $ARTIST"
+    [[ -n "$POOL_ID" ]] && log_write "INFO" "  Pool ID: $POOL_ID"
+    $DRY_RUN && log_write "INFO" "  Dry run: enabled"
+    $DISCOVER_TAGS && log_write "INFO" "  Tag discovery: enabled"
+    $DISCOVER_ARTISTS && log_write "INFO" "  Artist discovery: enabled"
+    $LIST_POOLS && log_write "INFO" "  Pool listing: enabled"
+    [[ -n "$SEARCH_POOLS" ]] && log_write "INFO" "  Pool search: $SEARCH_POOLS"
+    [[ "$RANDOM_TAGS_COUNT" -gt 0 ]] && log_write "INFO" "  Random tags count: $RANDOM_TAGS_COUNT"
+    $CLEAN_MODE && log_write "INFO" "  Clean mode: enabled"
+    $FORCE_CLEAN && log_write "INFO" "  Force clean: enabled"
+}
+
+log_api_call() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    local api_url="$1"
+    log_write "DEBUG" "API call: $api_url"
+}
+
+log_file_operation() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    local operation="$1"
+    local filepath="$2"
+    local extra_info="$3"
+    
+    if [[ "$LOG_LEVEL" == "verbose" ]]; then
+        if [[ -n "$extra_info" ]]; then
+            log_write "TRACE" "File operation: $operation - $filepath ($extra_info)"
+        else
+            log_write "TRACE" "File operation: $operation - $filepath"
+        fi
+    fi
+}
+
+log_wallpaper_set() {
+    if ! $ENABLE_LOGGING; then
+        return 0
+    fi
+    
+    local wallpaper_path="$1"
+    local command="$2"
+    
+    if [[ -f "$wallpaper_path" ]]; then
+        local file_size
+        file_size=$(stat -c%s "$wallpaper_path" 2>/dev/null || echo 0)
+        log_write "INFO" "Wallpaper set: $wallpaper_path ($(human_readable_size "$file_size"))"
+        log_write "DEBUG" "Command executed: $command"
+    else
+        log_write "ERROR" "Wallpaper file not found: $wallpaper_path"
+    fi
+}
+
+log_error() {
+    local message="$1"
+    log_write "ERROR" "$message"
+}
+
+log_warning() {
+    local message="$1"
+    log_write "WARNING" "$message"
+}
+
+log_success() {
+    local message="$1"
+    log_write "INFO" "$message"
+}
+
 # Load config before parsing CLI args
 load_config
+
+# Initialize logging
+log_init
 MAX_PRELOAD_CACHE=${MAX_PRELOAD_CACHE:-10}
 DISCOVER_LIMIT=${DISCOVER_LIMIT:-20}
 # --- Helpers ---
@@ -96,6 +281,27 @@ human_readable_size() {
     else
         awk "BEGIN {printf \"%.2fMB\", $bytes/1048576}"
     fi
+}
+
+parse_aspect_ratio() {
+    local ratio="$1"
+    case "$ratio" in
+        "16:9") echo "1.78" ;;
+        "21:9") echo "2.37" ;;
+        "4:3") echo "1.33" ;;
+        "1:1") echo "1.00" ;;
+        "3:2") echo "1.50" ;;
+        "5:4") echo "1.25" ;;
+        "32:9") echo "3.56" ;;
+        *)
+            if [[ "$ratio" =~ ^([0-9]+):([0-9]+)$ ]]; then
+                awk "BEGIN {printf \"%.2f\", ${BASH_REMATCH[1]}/${BASH_REMATCH[2]}}"
+            else
+                echo "Error: invalid aspect ratio '$ratio' (use format like '16:9')" >&2
+                exit 1
+            fi
+            ;;
+    esac
 }
 
 parse_page_argument() {
@@ -132,6 +338,8 @@ parse_page_argument() {
     return 1
 }
 
+
+
 # --- Parse Args ---
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
@@ -147,8 +355,13 @@ while [[ "$#" -gt 0 ]]; do
         -o|--order) ORDER="$2"; shift ;;
          -s|--max-file-size) MAX_FILE_SIZE="$2"; shift ;;
          -z|--min-file-size) MIN_FILE_SIZE="$2"; shift ;;
-        -m|--min-score) MIN_SCORE="$2"; shift ;;
-        -a|--artist) ARTIST="$2"; shift ;;
+         --min-width) MIN_WIDTH="$2"; shift ;;
+         --max-width) MAX_WIDTH="$2"; shift ;;
+         --min-height) MIN_HEIGHT="$2"; shift ;;
+         --max-height) MAX_HEIGHT="$2"; shift ;;
+         --aspect-ratio) ASPECT_RATIO="$2"; shift ;;
+         -m|--min-score) MIN_SCORE="$2"; shift ;;
+         -a|--artist) ARTIST="$2"; shift ;;
         -P|--pool) POOL_ID="$2"; shift ;;
         -d|--dry-run) DRY_RUN=true ;;
         -D|--discover-tags) DISCOVER_TAGS=true ;;
@@ -169,6 +382,11 @@ while [[ "$#" -gt 0 ]]; do
              echo "  -p, --page           Page number, 'random', or 'MIN-MAX' range (default: 1)"
              echo "  -s, --max-file-size  Max file size (e.g. 500KB, 2MB; 0 to disable, default: 2MB)"
             echo "  -z, --min-file-size  Min file size (e.g. 100KB, 1MB; 0 to disable, default: disabled)"
+            echo "  --min-width         Minimum width in pixels (e.g., 1920)"
+            echo "  --max-width         Maximum width in pixels (e.g., 3840)"
+            echo "  --min-height        Minimum height in pixels (e.g., 1080)"
+            echo "  --max-height        Maximum height in pixels (e.g., 2160)"
+            echo "  --aspect-ratio      Aspect ratio (e.g., 16:9, 21:9, 4:3, 1:1, 3:2, 5:4, 32:9 or custom X:Y)"
             echo "  -m, --min-score      Minimum score filter (optional)"
             echo "  -a, --artist         Filter by artist/uploader (optional)"
             echo "  -P, --pool           Use pool ID instead of tag search"
@@ -188,49 +406,66 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# --- Init Mode ---
-if $INIT_MODE; then
-    config_src="$(dirname "$0")/konapaper.conf"
-    config_dest="$HOME/.config/konapaper/konapaper.conf"
-    if [[ ! -f "$config_src" ]]; then
-        echo "Error: Source config file not found at $config_src"
-        exit 1
-    fi
-    mkdir -p "$HOME/.config/konapaper"
-    cp "$config_src" "$config_dest"
-    echo "Config file copied to $config_dest"
-    exit 0
-fi
+
 
 # Process random tags if specified
 process_random_tags
 
-echo "Current run arguments:"
-echo "  Limit: $LIMIT"
-echo "  Page: $PAGE"
-echo "  Rating: $RATING"
-echo "  Order: $ORDER"
-echo "  Max file size: $MAX_FILE_SIZE"
-[[ -n "$MIN_FILE_SIZE" ]] && echo "  Min file size: $MIN_FILE_SIZE"
-[[ -n "$TAGS" ]] && echo "  Tags: $TAGS"
-[[ -n "$MIN_SCORE" ]] && echo "  Min score: $MIN_SCORE"
-[[ -n "$ARTIST" ]] && echo "  Artist: $ARTIST"
-[[ -n "$POOL_ID" ]] && echo "  Pool ID: $POOL_ID"
- $DRY_RUN && echo "  Dry run: enabled"
- $DISCOVER_TAGS && echo "  Tag discovery: enabled"
- $DISCOVER_ARTISTS && echo "  Artist discovery: enabled"
- $LIST_POOLS && echo "  Pool listing: enabled"
-  [[ -n "$SEARCH_POOLS" ]] && echo "  Pool search: $SEARCH_POOLS"
-  [[ "$RANDOM_TAGS_COUNT" -gt 0 ]] && echo "  Random tags count: $RANDOM_TAGS_COUNT"
-  $CLEAN_MODE && echo "  Clean mode: enabled"
-  $FORCE_CLEAN && echo "  Force clean: enabled"
+# Log command arguments
+log_command_args
+
+# Only show run arguments for non-init modes
+if ! $INIT_MODE; then
+    echo "Current run arguments:"
+    echo "  Limit: $LIMIT"
+    echo "  Page: $PAGE"
+    echo "  Rating: $RATING"
+    echo "  Order: $ORDER"
+    echo "  Max file size: $MAX_FILE_SIZE"
+    [[ -n "$MIN_FILE_SIZE" ]] && echo "  Min file size: $MIN_FILE_SIZE"
+    [[ -n "$MIN_WIDTH" ]] && echo "  Min width: $MIN_WIDTH"
+    [[ -n "$MAX_WIDTH" ]] && echo "  Max width: $MAX_WIDTH"
+    [[ -n "$MIN_HEIGHT" ]] && echo "  Min height: $MIN_HEIGHT"
+    [[ -n "$MAX_HEIGHT" ]] && echo "  Max height: $MAX_HEIGHT"
+    [[ -n "$ASPECT_RATIO" ]] && echo "  Aspect ratio: $ASPECT_RATIO"
+    [[ -n "$TAGS" ]] && echo "  Tags: $TAGS"
+    [[ -n "$MIN_SCORE" ]] && echo "  Min score: $MIN_SCORE"
+    [[ -n "$ARTIST" ]] && echo "  Artist: $ARTIST"
+    [[ -n "$POOL_ID" ]] && echo "  Pool ID: $POOL_ID"
+     $DRY_RUN && echo "  Dry run: enabled"
+     $DISCOVER_TAGS && echo "  Tag discovery: enabled"
+     $DISCOVER_ARTISTS && echo "  Artist discovery: enabled"
+     $LIST_POOLS && echo "  Pool listing: enabled"
+      [[ -n "$SEARCH_POOLS" ]] && echo "  Pool search: $SEARCH_POOLS"
+      [[ "$RANDOM_TAGS_COUNT" -gt 0 ]] && echo "  Random tags count: $RANDOM_TAGS_COUNT"
+      $CLEAN_MODE && echo "  Clean mode: enabled"
+      $FORCE_CLEAN && echo "  Force clean: enabled"
+fi
 
 MAX_FILE_SIZE_BYTES=$(convert_to_bytes "$MAX_FILE_SIZE")
-MIN_FILE_SIZE_BYTES=$(convert_to_bytes "$MIN_FILE_SIZE")
+if [[ -n "$MIN_FILE_SIZE" ]]; then
+    MIN_FILE_SIZE_BYTES=$(convert_to_bytes "$MIN_FILE_SIZE")
+else
+    MIN_FILE_SIZE_BYTES=0
+fi
+
+# Convert aspect ratio if specified
+ASPECT_RATIO_FLOAT="0"
+if [[ -n "$ASPECT_RATIO" ]]; then
+    if ! ASPECT_RATIO_FLOAT=$(parse_aspect_ratio "$ASPECT_RATIO"); then
+        exit 1
+    fi
+fi
+
+# Convert width/height to numeric or 0 for jq
+MIN_WIDTH_NUM=${MIN_WIDTH:-0}
+MAX_WIDTH_NUM=${MAX_WIDTH:-0}
+MIN_HEIGHT_NUM=${MIN_HEIGHT:-0}
+MAX_HEIGHT_NUM=${MAX_HEIGHT:-0}
 
 # --- Paths ---
-LOCKFILE="/tmp/hypr_wallpaper_setter.lock"
-CACHE_DIR="$HOME/.cache/hypr_wallpapers"
+LOCKFILE="/tmp/konapaper_setter.lock"
+CACHE_DIR="$HOME/.cache/konapaper"
 mkdir -p "$CACHE_DIR"
 
 PRELOAD_DIR="$CACHE_DIR/preload_$RATING"
@@ -240,16 +475,19 @@ CURRENT_WALLPAPER="$CACHE_DIR/current.jpg"
 
 # --- Cleanup Mode ---
 if $CLEAN_MODE; then
+    log_write "INFO" "Starting cache cleanup mode"
     echo "⚠️  Cleaning preload cache folders in: $CACHE_DIR"
     if ! $FORCE_CLEAN; then
         read -rp "Are you sure? This will delete all preloaded wallpapers but keep the current one. (y/N): " confirm
         if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
             echo "Aborted."
+            log_write "INFO" "Cache cleanup aborted by user"
             exit 0
         fi
     fi
     find "$CACHE_DIR" -maxdepth 1 -type d -name "preload_*" -exec rm -rf {} +
     echo "✅ Preload cache cleaned. Current wallpaper preserved."
+    log_success "Cache cleanup completed"
     exit 0
 fi
 
@@ -276,31 +514,74 @@ download_wallpaper() {
     fi
 
     echo "-> Querying API: $API_URL"
+    log_api_call "$API_URL"
+    log_file_operation "create" "temp_json_file"
     local json
     json=$(mktemp)
     if ! curl -sf "$API_URL" > "$json"; then
         echo "Error: failed to reach $BASE_URL"
+        log_error "API request failed: $BASE_URL"
+        log_file_operation "delete" "$json"
         rm -f "$json"
         return 1
     fi
 
     if [[ "$DRY_RUN" == true ]]; then
+        log_write "INFO" "Dry run mode: displaying available posts"
         echo "---- Available Posts ----"
         printf "ID\tScore\tAuthor\tWidth\tHeight\tSize\tTags\n"
-        if (( MAX_FILE_SIZE_BYTES == 0 && MIN_FILE_SIZE_BYTES == 0 )); then
+        if (( MAX_FILE_SIZE_BYTES == 0 && MIN_FILE_SIZE_BYTES == 0 )) && [[ -z "$MIN_WIDTH" && -z "$MAX_WIDTH" && -z "$MIN_HEIGHT" && -z "$MAX_HEIGHT" && "$ASPECT_RATIO_FLOAT" == "0" ]]; then
             jq -r 'if type == "array" then . else .posts? // . end | map([.id, (.score // 0), (.author // "unknown"), .width, .height, (.file_size|tostring), (.tags | .[0:50])]) | .[] | @tsv' "$json"
         else
-            jq -r --argjson max "$MAX_FILE_SIZE_BYTES" --argjson min "$MIN_FILE_SIZE_BYTES" 'if type == "array" then . else .posts? // . end | map(select(type == "object" and .file_size != null and (.file_size <= $max or $max == 0) and (.file_size >= $min or $min == 0))) | map([.id, (.score // 0), (.author // "unknown"), .width, .height, (.file_size|tostring), (.tags | .[0:50])]) | .[] | @tsv' "$json"
+            jq -r --argjson max_size "$MAX_FILE_SIZE_BYTES" --argjson min_size "$MIN_FILE_SIZE_BYTES" \
+                --argjson max_width "$MAX_WIDTH_NUM" --argjson min_width "$MIN_WIDTH_NUM" \
+                --argjson max_height "$MAX_HEIGHT_NUM" --argjson min_height "$MIN_HEIGHT_NUM" \
+                --argjson aspect_ratio "$ASPECT_RATIO_FLOAT" \
+'if type == "array" then . else .posts? // . end | 
+ map(select(
+    type == "object" and 
+    .file_size != null and 
+    .width != null and 
+    .height != null and
+    (.file_size <= $max_size or $max_size == 0) and 
+    (.file_size >= $min_size or $min_size == 0) and
+    (.width <= $max_width or $max_width == 0) and
+    (.width >= $min_width or $min_width == 0) and
+    (.height <= $max_height or $max_height == 0) and
+    (.height >= $min_height or $min_height == 0) and
+    ($aspect_ratio == 0 or (.width / .height >= ($aspect_ratio - 0.02) and .width / .height <= ($aspect_ratio + 0.02)))
+ )) | 
+ map([.id, (.score // 0), (.author // "unknown"), .width, .height, (.file_size|tostring), (.tags | .[0:50])]) | 
+ .[] | @tsv' "$json"
         fi
+        log_file_operation "delete" "$json"
         rm -f "$json"
         return 0
     fi
 
     local IMAGE_URL
-    if (( MAX_FILE_SIZE_BYTES == 0 && MIN_FILE_SIZE_BYTES == 0 )); then
+    if (( MAX_FILE_SIZE_BYTES == 0 && MIN_FILE_SIZE_BYTES == 0 )) && [[ -z "$MIN_WIDTH" && -z "$MAX_WIDTH" && -z "$MIN_HEIGHT" && -z "$MAX_HEIGHT" && "$ASPECT_RATIO_FLOAT" == "0" ]]; then
         IMAGE_URL=$(jq -r 'if type == "array" then . else .posts? // . end | .[].file_url' "$json" | shuf -n 1)
     else
-        IMAGE_URL=$(jq -r --argjson max "$MAX_FILE_SIZE_BYTES" --argjson min "$MIN_FILE_SIZE_BYTES" 'if type == "array" then . else .posts? // . end | map(select(type == "object" and .file_size != null and (.file_size <= $max or $max == 0) and (.file_size >= $min or $min == 0))) | .[].file_url' "$json" | shuf -n 1)
+        IMAGE_URL=$(jq -r --argjson max_size "$MAX_FILE_SIZE_BYTES" --argjson min_size "$MIN_FILE_SIZE_BYTES" \
+            --argjson max_width "$MAX_WIDTH_NUM" --argjson min_width "$MIN_WIDTH_NUM" \
+            --argjson max_height "$MAX_HEIGHT_NUM" --argjson min_height "$MIN_HEIGHT_NUM" \
+            --argjson aspect_ratio "$ASPECT_RATIO_FLOAT" \
+'if type == "array" then . else .posts? // . end | 
+ map(select(
+    type == "object" and 
+    .file_size != null and 
+    .width != null and 
+    .height != null and
+    (.file_size <= $max_size or $max_size == 0) and 
+    (.file_size >= $min_size or $min_size == 0) and
+    (.width <= $max_width or $max_width == 0) and
+    (.width >= $min_width or $min_width == 0) and
+    (.height <= $max_height or $max_height == 0) and
+    (.height >= $min_height or $min_height == 0) and
+    ($aspect_ratio == 0 or (.width / .height >= ($aspect_ratio - 0.02) and .width / .height <= ($aspect_ratio + 0.02)))
+ )) | 
+ .[].file_url' "$json" | shuf -n 1)
     fi
 
     rm -f "$json"
@@ -319,8 +600,12 @@ download_wallpaper() {
     fi
 
     echo "-> Downloading: $IMAGE_URL"
+    log_write "INFO" "Downloading image: $IMAGE_URL"
+    log_file_operation "download" "$outfile" "from $IMAGE_URL"
     if ! curl -sfL "$IMAGE_URL" -o "$outfile"; then
         echo "Error: download failed."
+        log_error "Download failed: $IMAGE_URL"
+        log_file_operation "delete" "$outfile"
         rm -f "$outfile"
         return 1
     fi
@@ -329,25 +614,223 @@ download_wallpaper() {
     size=$(stat -c%s "$outfile")
     if (( MAX_FILE_SIZE_BYTES > 0 && size > MAX_FILE_SIZE_BYTES )); then
         echo "Skipped (too large: $(human_readable_size "$size"))"
+        log_warning "Image skipped due to size limit: $(human_readable_size "$size") > $MAX_FILE_SIZE"
+        log_file_operation "delete" "$outfile" "size limit exceeded"
         rm -f "$outfile"
         return 1
     fi
     if (( MIN_FILE_SIZE_BYTES > 0 && size < MIN_FILE_SIZE_BYTES )); then
         echo "Skipped (too small: $(human_readable_size "$size"))"
+        log_warning "Image skipped due to minimum size: $(human_readable_size "$size") < $MIN_FILE_SIZE"
+        log_file_operation "delete" "$outfile" "below minimum size"
         rm -f "$outfile"
         return 1
     fi
 
     echo "-> Download complete ($(human_readable_size "$size"))"
+    log_success "Image downloaded successfully: $outfile ($(human_readable_size "$size"))"
     return 0
+}
+
+# --- Display Server Detection ---
+detect_display_server() {
+    local display_server="unknown"
+    local wallpaper_tool=""
+    
+    # Method 1: Environment variables (most reliable)
+    if [[ -n "$WAYLAND_DISPLAY" ]]; then
+        display_server="wayland"
+    elif [[ -n "$XDG_SESSION_TYPE" ]]; then
+        case "$XDG_SESSION_TYPE" in
+            wayland) display_server="wayland" ;;
+            x11) display_server="x11" ;;
+        esac
+    elif [[ -n "$DISPLAY" ]]; then
+        display_server="x11"
+    fi
+    
+    # Method 2: Process detection (fallback)
+    if [[ "$display_server" == "unknown" ]]; then
+        if pgrep -x "Xorg" >/dev/null 2>&1 || pgrep -x "Xwayland" >/dev/null 2>&1; then
+            display_server="x11"
+        elif pgrep -x "sway" >/dev/null 2>&1 || pgrep -x "hyprland" >/dev/null 2>&1 || \
+             pgrep -x "weston" >/dev/null 2>&1 || pgrep -x "gnome-shell" >/dev/null 2>&1; then
+            display_server="wayland"
+        fi
+    fi
+    
+    # Method 3: loginctl detection (another fallback)
+    if [[ "$display_server" == "unknown" ]] && command -v loginctl >/dev/null 2>&1; then
+        local session_id
+        session_id=$(loginctl | grep "$(whoami)" | awk '{print $1}' | head -n1)
+        if [[ -n "$session_id" ]]; then
+            local session_type
+            session_type=$(loginctl show-session "$session_id" -p Type 2>/dev/null | cut -d'=' -f2)
+            case "$session_type" in
+                wayland) display_server="wayland" ;;
+                x11) display_server="x11" ;;
+            esac
+        fi
+    fi
+    
+    # Detect available wallpaper tools
+    case "$display_server" in
+        wayland)
+            if command -v swww >/dev/null 2>&1; then
+                wallpaper_tool="swww"
+            elif command -v swaybg >/dev/null 2>&1; then
+                wallpaper_tool="swaybg"
+            elif command -v hyprpaper >/dev/null 2>&1; then
+                wallpaper_tool="hyprpaper"
+            fi
+            ;;
+        x11)
+            if command -v feh >/dev/null 2>&1; then
+                wallpaper_tool="feh"
+            elif command -v nitrogen >/dev/null 2>&1; then
+                wallpaper_tool="nitrogen"
+            elif command -v fbsetbg >/dev/null 2>&1; then
+                wallpaper_tool="fbsetbg"
+            elif command -v xwallpaper >/dev/null 2>&1; then
+                wallpaper_tool="xwallpaper"
+            fi
+            ;;
+    esac
+    
+    echo "$display_server:$wallpaper_tool"
 }
 
 # --- Wallpaper Handling ---
 set_wallpaper() {
     local img="$1"
-    echo "Setting wallpaper: $img"
-    swww img "$img" --transition-type any --transition-fps 60 --transition-duration 1
+    
+    # Use configured wallpaper command if specified
+    if [[ -n "$WALLPAPER_COMMAND" ]]; then
+        echo "Using wallpaper command..."
+        local cmd="${WALLPAPER_COMMAND//\{IMAGE\}/\"$img\"}"
+        echo "Executing: $cmd"
+        log_write "INFO" "Using custom wallpaper command: $cmd"
+        if eval "$cmd"; then
+            log_wallpaper_set "$img" "$cmd"
+        else
+            log_error "Wallpaper command failed: $cmd"
+        fi
+        return $?
+    fi
+    
+    # Auto-detect and use default wallpaper tool command from config
+    local detection
+    detection=$(detect_display_server)
+    local display_server="${detection%:*}"
+    local wallpaper_tool="${detection#*:}"
+    
+    echo "Detected display server: $display_server"
+    echo "Using wallpaper tool: $wallpaper_tool"
+    
+    local tool_var="WALLPAPER_COMMAND_${wallpaper_tool^^}"
+    local tool_cmd="${!tool_var}"
+    
+    if [[ -n "$tool_cmd" ]]; then
+        echo "Using default command for $wallpaper_tool"
+        local cmd="${tool_cmd//\{IMAGE\}/\"$img\"}"
+        echo "Executing: $cmd"
+        log_write "INFO" "Using default command for $wallpaper_tool: $cmd"
+        if eval "$cmd"; then
+            log_wallpaper_set "$img" "$cmd"
+        else
+            log_error "Wallpaper command failed: $cmd"
+        fi
+        return $?
+    else
+        echo "Error: No command configured for $wallpaper_tool"
+        echo "Please set WALLPAPER_COMMAND in your config file or install a supported tool."
+        log_error "No command configured for $wallpaper_tool"
+        return 1
+    fi
 }
+
+# --- Init Mode ---
+if $INIT_MODE; then
+    config_src="$(dirname "$0")/konapaper.conf"
+    config_dest="$HOME/.config/konapaper/konapaper.conf"
+    if [[ ! -f "$config_src" ]]; then
+        echo "Error: Source config file not found at $config_src"
+        exit 1
+    fi
+    
+    echo "=== Konapaper Initialization ==="
+    echo "Detecting your display environment..."
+    
+    detection=$(detect_display_server)
+    display_server="${detection%:*}"
+    wallpaper_tool="${detection#*:}"
+    
+    echo "Detected display server: $display_server"
+    if [[ -n "$wallpaper_tool" ]]; then
+        echo "Available wallpaper tool: $wallpaper_tool"
+    else
+        echo "No suitable wallpaper tool found"
+        echo "Please install a wallpaper tool for your display server:"
+        if [[ "$display_server" == "wayland" ]]; then
+            echo "  - swww (recommended)"
+            echo "  - swaybg"
+            echo "  - hyprpaper"
+        else
+            echo "  - feh (recommended)"
+            echo "  - nitrogen"
+            echo "  - fbsetbg"
+            echo "  - xwallpaper"
+        fi
+    fi
+    
+    mkdir -p "$HOME/.config/konapaper"
+    cp "$config_src" "$config_dest"
+    
+    # Add display server setting to config
+    if ! grep -q "^DISPLAY_SERVER=" "$config_dest"; then
+        echo "DISPLAY_SERVER=\"$display_server\"" >> "$config_dest"
+    else
+        sed -i "s/^DISPLAY_SERVER=.*/DISPLAY_SERVER=\"$display_server\"/" "$config_dest"
+    fi
+    
+    # Set wallpaper command for detected tool
+    if [[ -n "$wallpaper_tool" ]]; then
+        tool_var="WALLPAPER_COMMAND_${wallpaper_tool^^}"
+        # Get the command from the newly copied config
+        tool_cmd=$(grep "^${tool_var}=" "$config_dest" | cut -d'=' -f2- | tr -d '"')
+        
+        if [[ -n "$tool_cmd" ]]; then
+            # Set the active wallpaper command
+            if ! grep -q "^WALLPAPER_COMMAND=" "$config_dest"; then
+                echo "WALLPAPER_COMMAND=\"$tool_cmd\"" >> "$config_dest"
+            else
+                sed -i "s|^WALLPAPER_COMMAND=.*|WALLPAPER_COMMAND=\"$tool_cmd\"|" "$config_dest"
+            fi
+        fi
+    fi
+    
+    echo ""
+    echo "📋 Configuration Summary:"
+    echo "  Display Server: $display_server"
+    if [[ -n "$wallpaper_tool" ]]; then
+        echo "  Wallpaper Tool: $wallpaper_tool"
+    fi
+    echo ""
+    echo "🔧 Default Settings (from config file):"
+    echo "  Rating: s (Safe)"
+    echo "  Order: random (for variety)"
+    echo "  Limit: 50 posts per query"
+    echo "  Max file size: 2MB"
+    echo "  Preload cache: 10 wallpapers"
+    echo "  Random tags list: landscape, scenic, sky, clouds, water, original, touhou, building"
+    echo ""
+    echo "✅ Configuration complete!"
+    echo "Config file: $config_dest"
+    echo "Cache directory: $HOME/.cache/konapaper"
+    echo ""
+    echo "You can now run konapaper normally. Edit the config file to customize settings."
+    exit 0
+fi
 
 # --- Preload Handling ---
 preload_wallpapers() {
@@ -450,10 +933,6 @@ list_pools() {
 }
 
 # --- Main ---
-if ! pgrep -x "swww-daemon" >/dev/null; then
-    swww-daemon &
-    sleep 0.5
-fi
 
 if [[ "$DRY_RUN" == true ]]; then
     download_wallpaper "/dev/null"
@@ -480,20 +959,26 @@ if $LIST_POOLS; then
     exit 0
 fi
 
+log_write "INFO" "Starting wallpaper selection process"
 next_wall=$(select_next_wallpaper)
 if [ -n "$next_wall" ]; then
+    log_write "INFO" "Using cached wallpaper: $next_wall"
     set_wallpaper "$next_wall"
 else
+    log_write "INFO" "No cached wallpapers found, downloading new one"
     echo "No cached wallpapers found; downloading..."
     if download_wallpaper "$CURRENT_WALLPAPER"; then
         set_wallpaper "$CURRENT_WALLPAPER"
     else
+        log_error "Failed to download wallpaper"
         echo "Failed to fetch wallpaper."
         flock -u 9
         exit 1
     fi
 fi
 
+log_write "INFO" "Starting preload process"
 preload_wallpapers &
 flock -u 9
+log_success "Script execution completed successfully"
 echo "Done."
