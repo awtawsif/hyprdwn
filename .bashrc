@@ -189,3 +189,10 @@ export LESSHISTFILE=/dev/null
 
 # Initialize zoxide
 eval "$(zoxide init --cmd cd bash)"
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/tawsif/.local/bin:$PATH"
+
+# opencode
+export PATH=/home/tawsif/.opencode/bin:$PATH

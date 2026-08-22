@@ -1,0 +1,48 @@
+# Wayle configuration file
+[modules.volume]
+level-icons = [
+    "ld-volume-symbolic",
+    "ld-volume-1-symbolic",
+    "ld-volume-2-symbolic",
+]
+icon-muted = "ld-volume-x-symbolic"
+border-show = false
+border-color = "red"
+icon-show = true
+icon-color = "auto"
+icon-bg-color = "red"
+label-show = true
+label-color = "red"
+format = "{{ percent }}%"
+label-max-length = 0
+button-bg-color = "bg-surface-elevated"
+left-click = "pavucontrol"
+right-click = "dropdown:audio"
+middle-click = "wayle audio output-mute"
+scroll-up = "wayle audio output-volume +5"
+scroll-down = "wayle audio output-volume -5"
+dropdown-app-icons = "mapped"
+thresholds = []
+
+[modules.brightness]
+level-icons = [
+    "ld-sun-dim-symbolic",
+    "ld-sun-medium-symbolic",
+    "ld-sun-symbolic",
+]
+border-show = false
+border-color = "yellow"
+icon-show = true
+icon-color = "auto"
+icon-bg-color = "yellow"
+label-show = true
+label-color = "yellow"
+format = "{{ percent }}%"
+label-max-length = 0
+button-bg-color = "bg-surface-elevated"
+left-click = "dropdown:brightness"
+right-click = ""
+middle-click = ""
+scroll-up = "brightnessctl s +1%"
+scroll-down = "brightnessctl s 1%-"
+thresholds = []

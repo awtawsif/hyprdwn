@@ -25,13 +25,12 @@ PACMAN_PACKAGES=(
     polkit-kde-agent # Polkit agent
     rofi # Application launcher
     rofi-emoji
-    swww # Wallpaper daemon
-    waybar # Status bar
+    awww # Wallpaper daemon
     wl-clipboard # Wayland clipboard utilities
     xdg-utils
     cliphist # Clipboard history
     blueman # Bluetooth manager
-    btop # Resource monitor
+    htop # Resource monitor
     slurp # Screen region selection
     smartmontools # S.M.A.R.T. disk monitoring
     uwsm
@@ -48,10 +47,12 @@ PACMAN_PACKAGES=(
     npm # Node package manager
 
     # --- Appearance & Theming ---
-    capitaine-cursors
+    bibata-cursor-theme
     otf-font-awesome
     ttf-jetbrains-mono-nerd
     noto-fonts-emoji
+    noto-fonts-extra
+    noto-fonts-cjk
     nwg-look # GTK theme switcher
 
     # --- CLI Tools ---
@@ -76,20 +77,17 @@ PACMAN_PACKAGES=(
     xarchiver
     p7zip
     tumbler # Thumbnail generator
-    firefox # Web browser
-    vlc # Media player
-    vlc-plugins-base
-    vlc-plugins-extra
     ffmpeg # Multimedia framework
+    mpv
 
     # --- Chaotic-AUR Packages ---
+    yay
     tokyonight-gtk-theme-git
-    visual-studio-code-bin
-    sddm-silent-theme
 )
 
 # AUR packages (remaining packages not in Chaotic-AUR or available in yay)
 YAY_PACKAGES=(
+    wayle-bin
     sddm-silent-theme
 )
 
@@ -107,7 +105,7 @@ fi
 # Install official repository packages with pacman
 if [ ${#PACMAN_PACKAGES[@]} -gt 0 ]; then
     echo -e "${CYAN}Installing packages with pacman (Official Repositories)...${NC}"
-    if sudo pacman -S --noconfirm "${PACMAN_PACKAGES[@]}"; then
+    if sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"; then
         echo -e "${GREEN}All official packages installed successfully.${NC}"
     else
         echo -e "${RED}Failed to install some official packages.${NC}"

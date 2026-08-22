@@ -1,0 +1,4 @@
+# Boorupaper runtime artifacts
+.config/boorupaper/*.log
+.config/boorupaper/discovered_tags*
+.config/boorupaper/downloaded_ids*

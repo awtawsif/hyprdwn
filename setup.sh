@@ -7,32 +7,6 @@ YELLOW="\033[0;33m"
 CYAN="\033[0;36m"
 NC="\033[0m"
 
-# --- Function to setup yay (kept for potential future AUR packages) ---
-setup_yay() {
-    if ! command -v yay &> /dev/null; then
-        echo -e "${YELLOW}Setting up yay for potential future AUR packages...${NC}"
-        sudo -v # Refresh sudo credentials
-        if git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin; then
-            cd /tmp/yay-bin || { echo -e "${RED}Failed to cd into /tmp/yay-bin${NC}"; return 1; }
-            if makepkg -si --noconfirm; then
-                cd - || { echo -e "${RED}Failed to cd back${NC}"; return 1; }
-                rm -rf /tmp/yay-bin
-                echo -e "${GREEN}yay has been installed successfully.${NC}"
-            else
-                echo -e "${RED}Failed to build and install yay.${NC}"
-                cd - || { echo -e "${RED}Failed to cd back${NC}"; return 1; }
-                rm -rf /tmp/yay-bin
-                return 1
-            fi
-        else
-            echo -e "${RED}Failed to clone yay repository.${NC}"
-            return 1
-        fi
-    else
-        echo -e "${GREEN}yay is already installed.${NC}"
-    fi
-}
-
 # --- Function to setup Chaotic-AUR ---
 setup_chaotic_aur() {
     echo -e "${YELLOW}Setting up Chaotic-AUR...${NC}"
